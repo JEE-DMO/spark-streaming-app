@@ -22,20 +22,6 @@ public class VerySimpleStreamingApp {
                 new JavaStreamingContext(conf, Durations.seconds(5));
 
 
-        // reception des données en temps réel de la source
-        JavaReceiverInputDStream<String> lines = streamingContext.socketTextStream(HOST, PORT);
-
-
-        // impression des lignes en sortie
-        //lines.print();
-
-
-        // map
-        JavaDStream<Sale> sales = lines.map(Sale::build);
-
-
-        JavaPairDStream<Integer, Float> storeAndRevenuPair = sales.mapToPair(s -> new Tuple2<>(s.getStoreId(), s.getGain()));
-        storeAndRevenuPair.print();
 
 
         // Execute le job spark
