@@ -1,8 +1,10 @@
-import org.apache.log4j.*;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.api.java.*;
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
+import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
+import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import scala.Tuple2;
 
 public class VerySimpleStreamingApp {
     private static final String HOST = "localhost";
@@ -20,13 +22,21 @@ public class VerySimpleStreamingApp {
                 new JavaStreamingContext(conf, Durations.seconds(5));
 
 
-
         // reception des données en temps réel de la source
         JavaReceiverInputDStream<String> lines = streamingContext.socketTextStream(HOST, PORT);
 
 
         // impression des lignes en sortie
-        lines.print();
+        //lines.print();
+
+
+        // map
+        JavaDStream<Sale> sales = lines.map(Sale::build);
+
+
+        JavaPairDStream<Integer, Float> storeAndRevenuPair = sales.mapToPair(s -> new Tuple2<>(s.getStoreId(), s.getGain()));
+        storeAndRevenuPair.print();
+
 
         // Execute le job spark
         streamingContext.start();
